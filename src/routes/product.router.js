@@ -8,36 +8,29 @@ router.get('/api/products', async (req, res) => {
   const perPage = parseInt(limit);
   const currentPage = parseInt(page);
 
-  // Filtros para la búsqueda
   const filters = {};
 
   if (query) {
-    // Filtrar por query (búsqueda general)
     filters.$text = { $search: query };
   }
 
   if (category) {
-    // Filtrar por categoría
     filters.category = category;
   }
 
   if (availability) {
-    // Filtrar por disponibilidad
     filters.availability = availability === 'true';
   }
 
   try {
-    // Consulta para obtener productos con opciones de paginación y filtrado
     const products = await ProductManager.getProducts(filters, perPage, currentPage, sort);
 
-    // Contar el total de productos para calcular totalPages
     const totalProducts = await ProductManager.countProducts(filters);
 
     const totalPages = Math.ceil(totalProducts / perPage);
     const hasNextPage = currentPage < totalPages;
     const hasPrevPage = currentPage > 1;
 
-    // Construir enlaces para páginas previas y siguientes
     const prevLink = hasPrevPage ? `/api/products?limit=${perPage}&page=${currentPage - 1}` : null;
     const nextLink = hasNextPage ? `/api/products?limit=${perPage}&page=${currentPage + 1}` : null;
 
@@ -74,7 +67,6 @@ router.get('/api/products/:pid', async (req, res) => {
   }
 });
 
-// Ruta para crear un nuevo producto
 router.post('/api/products', async (req, res) => {
   const { title, description, thumbnails, price, stock } = req.body;
   try {
@@ -87,7 +79,7 @@ router.post('/api/products', async (req, res) => {
 
 router.put('/api/products/:pid', async (req, res) => {
   const productId = req.params.pid;
-  const newData = req.body; // Nuevos datos a actualizar en el producto
+  const newData = req.body; 
   try {
     const updatedProduct = await ProductManager.updateProduct(productId, newData);
     if (!updatedProduct) {
@@ -100,7 +92,6 @@ router.put('/api/products/:pid', async (req, res) => {
   }
 });
 
-// Ruta para eliminar un producto por su ID
 router.delete('/api/products/:pid', async (req, res) => {
   const productId = req.params.pid;
   try {

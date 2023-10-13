@@ -15,7 +15,7 @@
     </div>
     {{/each}}
     <div id="cart-view">
-        <!-- Vista del carrito -->
+        
     </div>
     <script>
         const addToCartButtons = document.querySelectorAll('.add-to-cart');
@@ -24,15 +24,12 @@
         addToCartButtons.forEach(button => {
             button.addEventListener('click', (event) => {
                 const productId = event.target.getAttribute('data-product-id');
-                // Simulamos la adición del producto al carrito
                 cart.push({ productId, quantity: 1 });
 
-                // Actualizamos la vista del carrito
                 updateCartView(cart);
             });
         });
 
-        // Función para actualizar la vista del carrito
         function updateCartView(cart) {
             const cartView = document.getElementById('cart-view');
             cartView.innerHTML = '<h2>Carrito de Compras</h2>';
