@@ -1,52 +1,52 @@
-import express from 'express';
-import path from 'path';
-import mongoose from 'mongoose';
-import handlebars from 'express-handlebars';
-import ProductManager from '../src/dao/ProductManager.js';
-import CartManager from '../src/dao/CartManager.js';
-import productRouter from '../src/routes/product.router.js';
-import cartRouter from '../src/routes/cart.router.js';
-
-import '../src/db/db.config.js';
+import express from "express"
+import prodRouter from "../src/routes/product.router.js"
+import cartRouter from "../src/routes/cart.router.js"
+import ProductManager from "../src/dao/ProductManager.js"
+import CartManager from "../src/dao/CartManager.js"
+import mongoose from "mongoose"
+import "../src/db/db.config.js";
+import { engine } from "express-handlebars"
+import * as path from "path"
 import __dirname from "./utils.js"
 
-const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname + "/public"));
+const app = express()
 
-app.engine("handlebars",handlebars.engine())
-app.set("views", __dirname+"/views")
-app.set("view engine","handlebars")
+const PORT = 8080
+const product = new ProductManager()
+const cart = new CartManager()
 
-app.use('/api/products', productRouter);
-app.use('/api/carts', cartRouter);
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
 
-app.get('/products', async (req, res) => {
-  try {
-    const products = await ProductManager.getAllProducts();
-    res.render('products', { products });
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los productos' });
-  }
-});
+app.use("/api", prodRouter)
+app.use("/api", cartRouter)
 
-app.get('/carts/:cid', async (req, res) => {
-  const cartId = req.params.cid;
-  try {
-    const cart = await CartManager.getCartById(cartId);
-    if (!cart) {
-      res.status(404).json({ error: 'Carrito no encontrado' });
-    } else {
-      res.render('cart', { cart });
-    }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener el carrito' });
-  }
-});
-
-const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`Servidor en ejecución en el puerto ${PORT}`);
-});
+    console.log(`Servidor Express Puerto ${PORT}`)
+})
+
+app.engine("handlebars", engine())
+app.set("view engine", "handlebars")
+app.set("views", path.resolve(__dirname + "/views"))
+
+app.use("/", express.static(__dirname + "/public"))
+
+app.get("/", async (req, res) => {
+    let allProducts  = await product.getProducts()
+    allProducts = allProducts.map(product => product.toJSON());
+    res.render("home", {
+        title: "Vista Products",
+        products : allProducts
+    });
+})
+
+app.get("/carts/:cid", async (req, res) => {
+    let id = req.params.cid
+    let allCarts  = await cart.getCartWithProducts(id)
+    res.render("viewCart", {
+        title: "Vista Cart",
+        carts : allCarts
+    });
+})
+

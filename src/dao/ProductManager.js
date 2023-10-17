@@ -1,48 +1,139 @@
 import { productsModel } from '../db/models/products.model.js';
+import CartManager from '../dao/CartManager.js';
 
-const ProductManager = {
+class ProductManager {
+  constructor() {}
 
-  createProduct: async (title, description, thumbnails, price, stock) => {
+  async addProduct(productData) {
     try {
-      const newProduct = await productsModel.create({
-        title,
-        description,
-        thumbnails,
-        price,
-        stock,
-      });
-      return newProduct;
+      await productsModel.create(productData);
+      return 'Product added';
     } catch (error) {
-      throw error;
+      console.error('Error adding product:', error);
+      return 'Error adding product';
     }
-  },
+  }
 
-  getProductById: async (productId) => {
+  async updateProduct(id, productData) {
     try {
-      const product = await productsModel.findById(productId);
+      const product = await productsModel.findById(id);
+      if (!product) {
+        return 'Product not found';
+      }
+      product.set(productData);
+      await product.save();
+      return 'Product updated';
+    } catch (error) {
+      console.error('Error updating product:', error);
+      return 'Error updating product';
+    }
+  }
+
+  async getProducts() {
+    try {
+      const products = await productsModel.find({});
+      return products;
+    } catch (error) {
+      console.error('Error getting products:', error);
+      return [];
+    }
+  }
+
+  async getProductById(id) {
+    try {
+      const product = await productsModel.findById(id).lean();
+      if (!product) {
+        return 'Product not found';
+      }
       return product;
     } catch (error) {
-      throw error;
+      console.error('Error getting product:', error);
+      return 'Error getting product';
     }
-  },
+  }
 
-  updateProduct: async (productId, newData) => {
+  async getProductsByLimit(limit) {
     try {
-      const updatedProduct = await productsModel.findByIdAndUpdate(productId, newData, { new: true });
-      return updatedProduct;
+      const products = await productsModel.find().limit(limit);
+      return products;
     } catch (error) {
       throw error;
     }
-  },
+  }
 
-  deleteProduct: async (productId) => {
+  async getProductsByPage(page, productsPerPage) {
+    if (page <= 0) {
+      page = 1;
+    }
     try {
-      const result = await productsModel.findByIdAndDelete(productId);
-      return result;
+      const startIndex = (page - 1) * productsPerPage;
+      const products = await productsModel
+        .find()
+        .skip(startIndex)
+        .limit(productsPerPage);
+
+      return products;
     } catch (error) {
       throw error;
     }
-  },
-};
+  }
+
+  async getProductsByQuery(query) {
+    try {
+      const products = await productsModel.find({
+        description: { $regex: query, $options: 'i' },
+      });
+      return products;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getProductsMaster(page = 1, limit = 10, category, availability) {
+    try {
+      let filter = {};
+      const startIndex = (page - 1) * limit;
+
+      if (category) {
+        filter.category = category;
+      }
+      if (availability) {
+        filter.availability = availability;
+      }
+
+      const query = productsModel
+        .find(filter)
+        .skip(startIndex)
+        .limit(limit);
+
+      const products = await query.exec();
+
+      const totalProducts = await productsModel.countDocuments(filter);
+      const totalPages = Math.ceil(totalProducts / limit);
+
+      return {
+        products: products,
+        totalPages: totalPages,
+      };
+    } catch (error) {
+      console.error('Error getting products:', error);
+      return { status: 'error', payload: 'Error getting products' };
+    }
+  }
+
+  async deleteProduct(id) {
+    try {
+      const product = await productsModel.findById(id);
+      if (!product) {
+        return 'Product not found';
+      }
+      await product.remove();
+      return 'Product deleted';
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      return 'Error deleting product';
+    }
+  }
+}
 
 export default ProductManager;

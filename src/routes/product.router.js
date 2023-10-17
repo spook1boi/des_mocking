@@ -1,109 +1,101 @@
-import express from 'express';
-import ProductManager from '../dao/ProductManager.js';
+import { Router } from "express";
+import ProductManager from "../dao/ProductManager.js";
 
-const router = express.Router();
+const prodRouter = Router();
+const product = new ProductManager();
 
-router.get('/api/products', async (req, res) => {
-  const { limit = 10, page = 1, sort, query, category, availability } = req.query;
-  const perPage = parseInt(limit);
-  const currentPage = parseInt(page);
-
-  const filters = {};
-
-  if (query) {
-    filters.$text = { $search: query };
-  }
-
-  if (category) {
-    filters.category = category;
-  }
-
-  if (availability) {
-    filters.availability = availability === 'true';
-  }
-
-  try {
-    const products = await ProductManager.getProducts(filters, perPage, currentPage, sort);
-
-    const totalProducts = await ProductManager.countProducts(filters);
-
-    const totalPages = Math.ceil(totalProducts / perPage);
-    const hasNextPage = currentPage < totalPages;
-    const hasPrevPage = currentPage > 1;
-
-    const prevLink = hasPrevPage ? `/api/products?limit=${perPage}&page=${currentPage - 1}` : null;
-    const nextLink = hasNextPage ? `/api/products?limit=${perPage}&page=${currentPage + 1}` : null;
-
-    const response = {
-      status: 'success',
-      payload: products,
-      totalPages,
-      prevPage: hasPrevPage ? currentPage - 1 : null,
-      nextPage: hasNextPage ? currentPage + 1 : null,
-      page: currentPage,
-      hasPrevPage,
-      hasNextPage,
-      prevLink,
-      nextLink,
-    };
-
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los productos' });
-  }
-});
-
-router.get('/api/products/:pid', async (req, res) => {
-  const productId = req.params.pid;
-  try {
-    const product = await ProductManager.getProductById(productId);
-    if (!product) {
-      res.status(404).json({ error: 'Producto no encontrado' });
-    } else {
-      res.status(200).json(product);
+// http://localhost:8080/api/products/productID - GET.
+prodRouter.get("/products/:id", async (req, res) => {
+    try {
+        const prodId = req.params.id;
+        const productDetails = await product.getProductById(prodId);
+        if (productDetails === 'Product not found') {
+            res.status(404).json({ error: 'Product not found' });
+        } else {
+            res.render('viewProducts', { layout: 'main', product: productDetails });
+        }
+    } catch (error) {
+        console.error('Error getting the product:', error);
+        res.status(500).json({ error: 'Error getting the product' });
     }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener el producto' });
-  }
 });
 
-router.post('/api/products', async (req, res) => {
-  const { title, description, thumbnails, price, stock } = req.body;
-  try {
-    const newProduct = await ProductManager.createProduct(title, description, thumbnails, price, stock);
-    res.status(201).json(newProduct);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al crear el producto' });
-  }
+// http://localhost:8080/api/products/limit?limit=numberLimit - GET.
+prodRouter.get("/limit", async (req, res) => {
+    const limit = parseInt(req.query.limit) || 10;
+    res.send(await product.getProductsByLimit(limit));
 });
 
-router.put('/api/products/:pid', async (req, res) => {
-  const productId = req.params.pid;
-  const newData = req.body; 
-  try {
-    const updatedProduct = await ProductManager.updateProduct(productId, newData);
-    if (!updatedProduct) {
-      res.status(404).json({ error: 'Producto no encontrado' });
-    } else {
-      res.status(200).json(updatedProduct);
+// http://localhost:8080/api/products/page/pageNumber - GET.
+prodRouter.get("/page/:page", async (req, res) => {
+    const page = parseInt(req.params.page);
+    if (isNaN(page) || page <= 0) {
+        return res.status(400).json({ error: 'Invalid page number' });
     }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el producto' });
-  }
-});
-
-router.delete('/api/products/:pid', async (req, res) => {
-  const productId = req.params.pid;
-  try {
-    const result = await ProductManager.deleteProduct(productId);
-    if (!result) {
-      res.status(404).json({ error: 'Producto no encontrado' });
-    } else {
-      res.status(204).send();
+    const productsPerPage = 10; 
+    try {
+        const products = await product.getProductsByPage(page, productsPerPage);
+        res.json(products);
+    } catch (error) {
+        console.error('Error getting products by page:', error);
+        res.status(500).json({ error: 'Error getting products by page' });
     }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar el producto' });
-  }
 });
 
-export default router;
+//  http://localhost:8080/api/products/ - PUT .
+prodRouter.put("/:id", async (req, res) => {
+    const id = req.params.id;
+    const updProd = req.body;
+    res.send(await product.updateProduct(id, updProd));
+});
+
+prodRouter.get("/page/:page/limit/:limit", async (req, res) => {
+    const page = parseInt(req.params.page);
+    const limit = parseInt(req.params.limit);
+
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+        return res.status(400).json({ error: 'Invalid pagination parameters' });
+    }
+
+    try {
+        const products = await product.getProductsByPage(page, limit);
+        res.render('viewProducts', {
+            layout: 'main',
+            products: products.products,
+            totalPages: products.totalPages,
+            currentPage: page,
+            hasPrevPage: products.hasPrevPage,
+            hasNextPage: products.hasNextPage,
+            prevLink: products.prevLink,
+            nextLink: products.nextLink,
+        });
+    } catch (error) {
+        console.error('Error getting products by page:', error);
+        res.status(500).json({ error: 'Error getting products by page' });
+    }
+});
+
+// http://localhost:8080/api/products/search/query?q=productName - GET.
+prodRouter.get("/search/query", async (req, res) => {
+    const query = req.query.q;
+    res.send(await product.getProductsByQuery(query));
+});
+
+prodRouter.get("/", async (req, res) => {
+    const sortOrder = req.query.sortOrder || "asc";
+    const category = req.query.category || "";
+    const availability = req.query.availability || "";
+    res.send(await product.getProductsMaster(null, null, category, availability, sortOrder));
+});
+
+prodRouter.post("/", async (req, res) => {
+    const newProduct = req.body;
+    res.send(await product.addProduct(newProduct));
+});
+
+prodRouter.delete("/:id", async (req, res) => {
+    const id = req.params.id;
+    res.send(await product.delProducts(id));
+});
+
+export default prodRouter;
