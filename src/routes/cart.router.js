@@ -4,11 +4,11 @@ import CartManager from "../dao/CartManager.js";
 const cartRouter = Router();
 const carts = new CartManager();
 
-cartRouter.get("/", async (req, res) => {
+cartRouter.get("/carts", async (req, res) => {
     res.send(await carts.getCarts());
 });
 
-cartRouter.get("/:id", async (req, res) => {
+cartRouter.get("/carts/:cid", async (req, res) => {
     const cartId = req.params.id;
     res.send(await carts.getCartById(cartId));
 });
@@ -28,32 +28,32 @@ cartRouter.post("/carts", async (req, res) => {
     }
 });
 
-cartRouter.post("/:cid/products/:pid", async (req, res) => {
+cartRouter.post("/carts/:cid/products/:pid", async (req, res) => {
     const cartId = req.params.cid;
     const prodId = req.params.pid;
     res.send(await carts.addProductInCart(cartId, prodId));
 });
 
-cartRouter.delete("/:cid/products/:pid", async (req, res) => {
+cartRouter.delete("/carts/:cid/products/:pid", async (req, res) => {
     const cartId = req.params.cid;
     const prodId = req.params.pid;
     res.send(await carts.removeProductFromCart(cartId, prodId));
 });
 
-cartRouter.put("/:cid", async (req, res) => {
+cartRouter.put("/carts/:cid", async (req, res) => {
     const cartId = req.params.cid;
     const newProducts = req.body;
     res.send(await carts.updateProductsInCart(cartId, newProducts));
 });
 
-cartRouter.put("/:cid/products/:pid", async (req, res) => {
+cartRouter.put("/carts/:cid/products/:pid", async (req, res) => {
     const cartId = req.params.cid;
     const prodId = req.params.pid;
     const newProduct = req.body;
     res.send(await carts.updateProductInCart(cartId, prodId, newProduct));
 });
 
-cartRouter.delete("/:cid", async (req, res) => {
+cartRouter.delete("/carts/:cid", async (req, res) => {
     const cartId = req.params.cid;
     res.send(await carts.removeAllProductsFromCart(cartId));
 });

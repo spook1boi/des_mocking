@@ -59,30 +59,30 @@ prodRouter.get("/products/page/:page", async (req, res) => {
     }
 });
 
-prodRouter.put("/:id", async (req, res) => {
+prodRouter.put("/products/:id", async (req, res) => {
     const id = req.params.id;
     const updProd = req.body;
     res.send(await product.updateProduct(id, updProd));
 });
 
 
-prodRouter.get("/search/query", async (req, res) => {
+prodRouter.get("/products/search/query", async (req, res) => {
     const query = req.query.q;
     res.send(await product.getProductsByQuery(query));
 });
 
 
-prodRouter.post("/", async (req, res) => {
+prodRouter.post("/products", async (req, res) => {
     const newProduct = req.body;
     res.send(await product.addProduct(newProduct));
 });
 
-prodRouter.delete("/:id", async (req, res) => {
+prodRouter.delete("/products/:id", async (req, res) => {
     const id = req.params.id;
     res.send(await product.delProducts(id));
 });
 
-prodRouter.get("/", async (req, res) => {
+prodRouter.get("/products", async (req, res) => {
     let sortOrder = req.query.sortOrder; 
     let category = req.query.category; 
     let availability = req.query.availability; 

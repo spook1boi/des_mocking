@@ -29,9 +29,9 @@ class CartManager {
     }
   }
 
-  async getCartById(id) {
+  async getCartById(cid) {
     try {
-      const cartId = new mongoose.Types.ObjectId(id);
+      const cartId = new mongoose.Types.ObjectId(cid);
       const cart = await this.cartsModel.findById(cartId);
       if (!cart) {
         return 'Cart not found';
