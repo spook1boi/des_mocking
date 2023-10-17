@@ -75,11 +75,28 @@ class ProductManager {
 
   async getProductsByLimit(limit) {
     try {
-      const products = await productsModel.find({}).limit(limit); // Aplica el límite a la consulta
+      const products = await productsModel.find({}).limit(limit); 
       return products;
     } catch (error) {
       throw error;
     }
+}
+
+async getProductsByPage(page, productsPerPage) {
+  if (page <= 0) {
+    page = 1;
+  }
+  try {
+    const startIndex = (page - 1) * productsPerPage;
+    const products = await productsModel
+      .find()
+      .skip(startIndex)
+      .limit(productsPerPage);
+    return products;
+  } catch (error) {
+    console.error('Error getting products by page:', error);
+    return { error: 'Error getting products by page' };
+  }
 }
 
   async getProductsMaster(page = 1, limit = 10, availability, category) {
