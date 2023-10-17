@@ -8,6 +8,13 @@
 
 <body>
 
+<div class="pagination">
+    <p>Página: {{page}}</p>
+    <p>Total Páginas: {{totalPages}}</p>
+    <a href="/?page={{page }}">Página Anterior</a>
+    <a href="/?page={{page }}">Página Siguiente</a>
+</div>
+
 <div class="infoProd">
     <h1>Product list</h1>
     <div class="detalleProd">
@@ -22,17 +29,6 @@
             </div>
             {{/each}}
         </div>
-    </div>
-    
-    <div class="pagination">
-        <p>Página: {{page}}</p>
-        <p>Total Páginas: {{totalPages}}</p>
-        {{#if hasPrevPage}}
-        <a href="{{prevLink}}">Pagina Anterior</a>
-        {{/if}}
-        {{#if hasNextPage}}
-        <a href="{{nextLink}}">Pagina Siguiente</a>
-        {{/if}}
     </div>
 </div>
 

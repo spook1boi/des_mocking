@@ -52,28 +52,12 @@ class ProductManager {
     }
   }
 
-  async getProductsByLimit(limit) {
+  async getProductsByCategory(category) {
     try {
-      const products = await productsModel.find().limit(limit);
+      const products = await productsModel.find({ category });
       return products;
     } catch (error) {
-      throw error;
-    }
-  }
-
-  async getProductsByPage(page, productsPerPage) {
-    if (page <= 0) {
-      page = 1;
-    }
-    try {
-      const startIndex = (page - 1) * productsPerPage;
-      const products = await productsModel
-        .find()
-        .skip(startIndex)
-        .limit(productsPerPage);
-
-      return products;
-    } catch (error) {
+      console.error('Error al obtener productos por categoría:', error);
       throw error;
     }
   }
@@ -89,31 +73,58 @@ class ProductManager {
     }
   }
 
-  async getProductsMaster(page = 1, limit = 10, category, availability) {
+  async getProductsByLimit(limit) {
+    try 
+    {
+      const products = await ProductManager.find().limit(limit);
+      if (products.length < limit) {
+        
+        limit = products.length;
+      }     
+      return products;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getProductsMaster(page = 1, limit = 10, availability, category) {
     try {
       let filter = {};
       const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
 
-      if (category) {
+      if (category != "") {
         filter.category = category;
       }
-      if (availability) {
+      if (availability != "") {
         filter.availability = availability;
       }
 
-      const query = productsModel
+      const query = ProductManager
         .find(filter)
         .skip(startIndex)
         .limit(limit);
 
       const products = await query.exec();
 
-      const totalProducts = await productsModel.countDocuments(filter);
+      const totalProducts = await ProductManager.countDocuments(filter);
       const totalPages = Math.ceil(totalProducts / limit);
+      const hasPrevPage = startIndex > 0;
+      const hasNextPage = endIndex < totalProducts;
+      const prevLink = hasPrevPage ? `/api/products?page=${page - 1}&limit=${limit}` : null;
+      const nextLink = hasNextPage ? `/api/products?page=${page + 1}&limit=${limit}` : null;
 
       return {
-        products: products,
+        status: 'success',
+        payload: products,
         totalPages: totalPages,
+        prevPage: hasPrevPage ? page - 1 : null,
+        nextPage: hasNextPage ? page + 1 : null,
+        page: page,
+        hasPrevPage: hasPrevPage,
+        hasNextPage: hasNextPage,
+        prevLink: prevLink,
+        nextLink: nextLink,
       };
     } catch (error) {
       console.error('Error getting products:', error);

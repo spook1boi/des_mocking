@@ -33,13 +33,29 @@ app.set("views", path.resolve(__dirname + "/views"))
 app.use("/", express.static(__dirname + "/public"))
 
 app.get("/", async (req, res) => {
-    let allProducts  = await product.getProducts()
-    allProducts = allProducts.map(product => product.toJSON());
+    const allProducts = await product.getProducts();
+    const productData = allProducts.map(product => product.toObject());
+
     res.render("home", {
         title: "Vista Products",
-        products : allProducts
+        products: productData
     });
-})
+});
+
+app.get("/", async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const productsPerPage = 5; 
+    const allProducts = await product.getProducts();
+    const totalPages = Math.ceil(allProducts.length / productsPerPage);
+    const productsToDisplay = allProducts.slice((page - 1) * productsPerPage, page * productsPerPage);
+
+    res.render("home", {
+        title: "Vista Products",
+        products: productsToDisplay,
+        page: page,
+        totalPages: totalPages
+    });
+});
 
 app.get("/carts/:cid", async (req, res) => {
     let id = req.params.cid
