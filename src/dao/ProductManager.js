@@ -74,18 +74,13 @@ class ProductManager {
   }
 
   async getProductsByLimit(limit) {
-    try 
-    {
-      const products = await ProductManager.find().limit(limit);
-      if (products.length < limit) {
-        
-        limit = products.length;
-      }     
+    try {
+      const products = await productsModel.find({}).limit(limit); // Aplica el límite a la consulta
       return products;
     } catch (error) {
       throw error;
     }
-  }
+}
 
   async getProductsMaster(page = 1, limit = 10, availability, category) {
     try {

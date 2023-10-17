@@ -36,7 +36,7 @@ prodRouter.get("/products/category/:category", async (req, res) => {
     }
   });
 
-prodRouter.get("/limit/:limit", async (req, res) => { 
+prodRouter.get("/products/limit/:limit", async (req, res) => { 
     let limit = parseInt(req.params.limit)
     if (isNaN(limit) || limit <= 0) {
         limit = 10;
@@ -44,7 +44,7 @@ prodRouter.get("/limit/:limit", async (req, res) => {
     res.send(await product.getProductsByLimit(limit))
 })
 
-prodRouter.get("/page/:page", async (req, res) => {
+prodRouter.get("/products/page/:page", async (req, res) => {
     const page = parseInt(req.params.page);
     if (isNaN(page) || page <= 0) {
         return res.status(400).json({ error: 'Invalid page number' });
