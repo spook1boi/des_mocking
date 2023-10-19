@@ -8,10 +8,21 @@
 
 <body>
 
+<div class="user-links">
+
+        <p>Bienvenido, {{user.first_name}} {{user.last_name}} - {{user.rol}}</p>
+        <a href="/api/logout">Cerrar Sesion</a>
+
+    <div>
+        <a href="/api/login">Iniciar Sesion</a>
+        <a href="/api/register">Registrarse</a>
+    </div>
+</div>
+
 <div class="pagination">
-    <p>Página: {{page}}</p>
-    <a href="/?page={{page }}">Página Anterior</a>
-    <a href="/?page={{page }}">Página Siguiente</a>
+    <p>Pagina: {{page}}</p>
+    <a href="/?page={{page }}">Pagina Anterior</a>
+    <a href="/?page={{page }}">Pagina Siguiente</a>
 </div>
 
 <div class="infoProd">

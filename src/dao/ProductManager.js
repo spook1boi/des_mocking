@@ -112,37 +112,37 @@ async getProductsByPage(page, productsPerPage) {
         filter.availability = availability;
       }
 
-      const query = ProductManager
-        .find(filter)
-        .skip(startIndex)
-        .limit(limit);
+      const query = productsModel
+      .find(filter)
+      .skip(startIndex)
+      .limit(limit);
 
-      const products = await query.exec();
+    const products = await query.exec();
 
-      const totalProducts = await ProductManager.countDocuments(filter);
-      const totalPages = Math.ceil(totalProducts / limit);
-      const hasPrevPage = startIndex > 0;
-      const hasNextPage = endIndex < totalProducts;
-      const prevLink = hasPrevPage ? `/api/products?page=${page - 1}&limit=${limit}` : null;
-      const nextLink = hasNextPage ? `/api/products?page=${page + 1}&limit=${limit}` : null;
+    const totalProducts = await productsModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalProducts / limit);
+    const hasPrevPage = startIndex > 0;
+    const hasNextPage = endIndex < totalProducts;
+    const prevLink = hasPrevPage ? `/api/products?page=${page - 1}&limit=${limit}` : null;
+    const nextLink = hasNextPage ? `/api/products?page=${page + 1}&limit=${limit}` : null;
 
-      return {
-        status: 'success',
-        payload: products,
-        totalPages: totalPages,
-        prevPage: hasPrevPage ? page - 1 : null,
-        nextPage: hasNextPage ? page + 1 : null,
-        page: page,
-        hasPrevPage: hasPrevPage,
-        hasNextPage: hasNextPage,
-        prevLink: prevLink,
-        nextLink: nextLink,
-      };
-    } catch (error) {
-      console.error('Error getting products:', error);
-      return { status: 'error', payload: 'Error getting products' };
-    }
+    return {
+      status: 'success',
+      payload: products,
+      totalPages: totalPages,
+      prevPage: hasPrevPage ? page - 1 : null,
+      nextPage: hasNextPage ? page + 1 : null,
+      page: page,
+      hasPrevPage: hasPrevPage,
+      hasNextPage: hasNextPage,
+      prevLink: prevLink,
+      nextLink: nextLink,
+    };
+  } catch (error) {
+    console.error('Error getting products:', error);
+    return { status: 'error', payload: 'Error getting products' };
   }
+}
 
   async deleteProduct(id) {
     try {

@@ -4,9 +4,9 @@ import ProductManager from "../dao/ProductManager.js";
 const prodRouter = Router();
 const product = new ProductManager();
 
-prodRouter.get("/products/:id", async (req, res) => {
+prodRouter.get("/products/:pid", async (req, res) => {
     try {
-        const prodId = req.params.id;
+        const prodId = req.params.pid;
         const productDetails = await product.getProductById(prodId);
         if (productDetails === 'Product not found') {
             res.status(404).json({ error: 'Product not found' });
@@ -59,10 +59,10 @@ prodRouter.get("/products/page/:page", async (req, res) => {
     }
 });
 
-prodRouter.put("/products/:id", async (req, res) => {
-    const id = req.params.id;
+prodRouter.put("/products/:pid", async (req, res) => {
+    const pid = req.params.pid;
     const updProd = req.body;
-    res.send(await product.updateProduct(id, updProd));
+    res.send(await product.updateProduct(pid, updProd));
 });
 
 
@@ -77,9 +77,9 @@ prodRouter.post("/products", async (req, res) => {
     res.send(await product.addProduct(newProduct));
 });
 
-prodRouter.delete("/products/:id", async (req, res) => {
-    const id = req.params.id;
-    res.send(await product.delProducts(id));
+prodRouter.delete("/products/:pid", async (req, res) => {
+    const pid = req.params.pid;
+    res.send(await product.delProducts(pid));
 });
 
 prodRouter.get("/products", async (req, res) => {
