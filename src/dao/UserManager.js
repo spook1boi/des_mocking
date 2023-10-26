@@ -1,43 +1,61 @@
-import { usersModel } from "../db/models/users.model.js";
+import { usersModel } from '../db/models/users.model.js';
 
 class UserManager {
-  constructor() {}
+  async getUsers() {
+    try {
+      const users = await usersModel.find({});
+      return users;
+    } catch (error) {
+      console.error('Error al obtener los usuarios:', error);
+      return [];
+    }
+  }
+
+  async getUserById(id) {
+    try {
+      const user = await usersModel.findById(id).lean();
+      if (!user) {
+        return 'Usuario no encontrado';
+      }
+      return user;
+    } catch (error) {
+      console.error('Error al obtener el usuario:', error);
+      return 'Error al obtener el usuario';
+    }
+  }
 
   async addUser(userData) {
     try {
-      const newUser = new usersModel(userData);
-      await newUser.save();
-      return 'User added';
+      const userCreate = await usersModel.create(userData);
+      return userCreate;
     } catch (error) {
-      console.error('Error adding user:', error);
-      return 'Error adding user';
+      console.error('Error al agregar el usuario:', error);
+      return 'Error al agregar el usuario';
     }
   }
 
-  async validateUser(email) {
+  async findUser(email) {
     try {
-      return await usersModel.findOne({ email }).lean();
+      const user = await usersModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, rol: 1 });
+
+      if (!user) {
+        return "Usuario no encontrado";
+      }
+
+      return user;
     } catch (error) {
-      console.error('Error validating user:', error);
-      throw error;
+      console.error('Error al validar usuario', error);
+      return 'Error al obtener el usuario';
     }
   }
 
-  async loginUser(email, password) {
+  async findEmail(param) {
     try {
-      const userData = await usersModel.findOne({ email }).lean();
-      if (!userData) {
-        throw new Error('User not found');
-      }
-
-      if (userData.password === password) {
-        return userData;
-      } else {
-        throw new Error('Invalid password');
-      }
+      const user = await usersModel.findOne(param);
+      return user;
     } catch (error) {
-      console.error('Error logging in:', error);
-      throw error;
+      console.error('Error al validar usuario', error);
+      return 'Error al obtener el usuario';
     }
   }
 }
