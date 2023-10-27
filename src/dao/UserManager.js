@@ -6,7 +6,7 @@ class UserManager {
       const users = await usersModel.find({});
       return users;
     } catch (error) {
-      console.error('Error al obtener los usuarios:', error);
+      console.error('Error while fetching users:', error);
       return [];
     }
   }
@@ -15,12 +15,12 @@ class UserManager {
     try {
       const user = await usersModel.findById(id).lean();
       if (!user) {
-        return 'Usuario no encontrado';
+        return 'User not found';
       }
       return user;
     } catch (error) {
-      console.error('Error al obtener el usuario:', error);
-      return 'Error al obtener el usuario';
+      console.error('Error while fetching the user:', error);
+      return 'Error while fetching the user';
     }
   }
 
@@ -29,23 +29,23 @@ class UserManager {
       const userCreate = await usersModel.create(userData);
       return userCreate;
     } catch (error) {
-      console.error('Error al agregar el usuario:', error);
-      return 'Error al agregar el usuario';
+      console.error('Error while adding the user:', error);
+      return 'Error while adding the user';
     }
   }
 
   async findUser(email) {
     try {
-      const user = await usersModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, rol: 1 });
+      const user = await usersModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, role: 1 });
 
       if (!user) {
-        return "Usuario no encontrado";
+        return "User not found";
       }
 
       return user;
     } catch (error) {
-      console.error('Error al validar usuario', error);
-      return 'Error al obtener el usuario';
+      console.error('Error while validating the user', error);
+      return 'Error while fetching the user';
     }
   }
 
@@ -54,8 +54,8 @@ class UserManager {
       const user = await usersModel.findOne(param);
       return user;
     } catch (error) {
-      console.error('Error al validar usuario', error);
-      return 'Error al obtener el usuario';
+      console.error('Error while validating the user', error);
+      return 'Error while fetching the user';
     }
   }
 }

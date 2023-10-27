@@ -17,7 +17,7 @@ const initializePassword = () => {
         const user = await userManager.findEmail({ email: username });
 
         if (user) {
-          console.log("El usuario ya existe");
+          console.log("User already exists");
           return done(null, false);
         }
 
@@ -35,7 +35,7 @@ const initializePassword = () => {
         const result = await userManager.addUser(newUser);
         return done(null, result);
       } catch (error) {
-        return done("Error al obtener el usuario: " + error);
+        return done("Error while fetching the user: " + error);
       }
     }
   ));
@@ -58,7 +58,7 @@ const initializePassword = () => {
       const user = await userManager.findEmail(username);
 
       if (!user) {
-        console.log("Usuario no existe");
+        console.log("User does not exist");
         return done(null, false);
       }
 
@@ -88,7 +88,7 @@ const initializePassword = () => {
           last_name: "github",
           email: profile._json.email,
           password: "",
-          rol: "usuario",
+          rol: "user",
         };
 
         const result = await userManager.addUser(newUser);
