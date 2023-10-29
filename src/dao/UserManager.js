@@ -34,6 +34,17 @@ class UserManager {
     }
   }
 
+  async register(user) {
+    try {
+      const newUser = new usersModel(user);
+      await newUser.save();
+
+      return newUser;
+    } catch (error) {
+      throw new Error("Error while registering: " + error.message);
+    }
+  }
+
   async findUser(email) {
     try {
       const user = await usersModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, rol: 1 });
