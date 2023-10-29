@@ -58,23 +58,23 @@ app.use("/api", cartRouter);
 app.use("/api/sessions", userRouter);
 
 app.get("/", async (req, res) => {
-    const allProducts = await product.getProducts();
-    const productData = allProducts.map(product => product.toJSON());
-    const page = parseInt(req.query.page) || 1;
+  const allProducts = await product.getProducts();
+  const productData = allProducts.map(product => product.toJSON());
+  const page = parseInt(req.query.page) || 1;
 
-    const user = {
-        first_name: req.session.nomUsuario,
-        last_name: req.session.apeUsuario,
-        rol: req.session.rolUsuario,
-    };
+  const user = {
+      first_name: req.session.firstName,
+      last_name: req.session.lastName,
+      rol: req.session.rol, // Cambiar 'rolUser' en lugar de 'rol'
+  };
 
-    console.log("User object:", user);
-    res.render("home", {
-        title: "Vista Products",
-        products: productData,
-        page: page,
-        user: user,  
-    });
+  console.log("User object:", user);
+  res.render("home", {
+      title: "Vista Products",
+      products: productData,
+      page: page,
+      user: user,  
+  });
 });
 
 app.get('/api/sessions/register', async (req, res) => {
@@ -88,11 +88,11 @@ app.get('/api/sessions/register', async (req, res) => {
   app.get('/api/sessions/profile', async(req, res) => {
     try {
       const user = {
-        first_name: req.session.nomUsuario,
-        last_name: req.session.apeUsuario,
-        email: req.session.emailUsuario,
+        first_name: req.session.firstName,
+        last_name: req.session.lastName,
+        email: req.session.emailUser,
         age: 30,
-        rol: req.session.rolUsuario,
+        rol: req.session.rolUser,
       };
   
       res.render('profile', user);

@@ -36,7 +36,7 @@ class UserManager {
 
   async findUser(email) {
     try {
-      const user = await usersModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, role: 1 });
+      const user = await usersModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, rol: 1 });
 
       if (!user) {
         return "User not found";
@@ -49,9 +49,10 @@ class UserManager {
     }
   }
 
-  async findEmail(param) {
+  async findEmail(email) {
     try {
-      const user = await usersModel.findOne(param);
+      const user = await usersModel.findOne({ email });
+
       return user;
     } catch (error) {
       console.error('Error while validating the user', error);

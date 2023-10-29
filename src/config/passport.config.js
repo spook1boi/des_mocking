@@ -12,17 +12,17 @@ const initializePassword = () => {
     { passReqToCallback: true, usernameField: "email" },
     async (req, username, password, done) => {
       const { first_name, last_name, email, age, rol } = req.body;
-
+  
       try {
-        const user = await userManager.findEmail({ email: username });
-
+        const user = await userManager.findEmail(username);
+  
         if (user) {
           console.log("User already exists");
           return done(null, false);
         }
-
+  
         const hashedPassword = await createHash(password);
-
+  
         const newUser = {
           first_name,
           last_name,
@@ -31,7 +31,7 @@ const initializePassword = () => {
           password: hashedPassword,
           rol
         };
-
+  
         const result = await userManager.addUser(newUser);
         return done(null, result);
       } catch (error) {
