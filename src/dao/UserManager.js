@@ -1,4 +1,5 @@
 import { usersModel } from '../db/models/users.model.js';
+import jwt from 'jsonwebtoken';
 
 class UserManager {
   async getUsers() {
@@ -26,11 +27,12 @@ class UserManager {
 
   async addUser(userData) {
     try {
-      const userCreate = await usersModel.create(userData);
-      return userCreate;
+      const user = new usersModel(userData);
+      const savedUser = await user.save();
+      return savedUser;
     } catch (error) {
       console.error('Error while adding the user:', error);
-      return 'Error while adding the user';
+      throw new Error('Error while adding the user');
     }
   }
 
@@ -38,10 +40,10 @@ class UserManager {
     try {
       const newUser = new usersModel(user);
       await newUser.save();
-
       return newUser;
     } catch (error) {
-      throw new Error("Error while registering: " + error.message);
+      console.error('Error while registering:', error);
+      throw new Error('Error while registering');
     }
   }
 
@@ -50,13 +52,13 @@ class UserManager {
       const user = await usersModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, rol: 1 });
 
       if (!user) {
-        return "User not found";
+        return null; 
       }
 
       return user;
     } catch (error) {
       console.error('Error while validating the user', error);
-      return 'Error while fetching the user';
+      throw new Error('Error while validating the user');
     }
   }
 
@@ -67,7 +69,27 @@ class UserManager {
       return user;
     } catch (error) {
       console.error('Error while validating the user', error);
-      return 'Error while fetching the user';
+      throw new Error('Error while validating the user');
+    }
+  }
+
+  async generateToken(user) {
+    try {
+      const token = jwt.sign({ email: user.email, rol: user.rol }, 'secret_key', { expiresIn: '1h' });
+      return token;
+    } catch (error) {
+      console.error('Error while generating token:', error);
+      throw new Error('Error while generating token');
+    }
+  }
+
+  async verifyToken(token) {
+    try {
+      const decoded = jwt.verify(token, 'secret_key');
+      return decoded;
+    } catch (error) {
+      console.error('Error while verifying token:', error);
+      throw new Error('Error while verifying token');
     }
   }
 }

@@ -1,6 +1,10 @@
 import path from "path"
 import { fileURLToPath } from "url"
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export const createHash = async (password) => {
   try {
@@ -14,19 +18,36 @@ export const createHash = async (password) => {
 };
 
 export const isValidPassword = (user, password) => {
-    console.log("Comparando contraseñas:");
-    console.log("Hash almacenado en la base de datos: " + user.password);
-    console.log("Contraseña proporcionada: " + password);
-  
-    if (!user || !user.password || !password) {
-      console.log("Faltan datos de usuario o contraseña.");
-      return false;
-    }
-  
-    return bcrypt.compareSync(password, user.password);
+  console.log("Comparando contraseñas:");
+  console.log("Hash almacenado en la base de datos: " + user.password);
+  console.log("Contraseña proporcionada: " + password);
+
+  if (!user || !user.password || !password) {
+    console.log("Faltan datos de usuario o contraseña.");
+    return false;
   }
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+  return bcrypt.compareSync(password, user.password);
+};
+
+export const generateToken = (payload) => {
+  try {
+    const token = jwt.sign(payload, 'secret_key', { expiresIn: '1h' });
+    return token;
+  } catch (error) {
+    console.error("Error al generar el token: ", error);
+    throw error;
+  }
+};
+
+export const verifyToken = (token) => {
+  try {
+    const decoded = jwt.verify(token, 'secret_key');
+    return decoded;
+  } catch (error) {
+    console.error("Error al verificar el token: ", error);
+    throw error;
+  }
+};
 
 export default __dirname
