@@ -1,10 +1,14 @@
-import { usersModel } from './models/users.model.js';
 import jwt from 'jsonwebtoken';
+import UserManager from '../dao/UserManager.js';
 
-class UserManager {
+class UserController {
+  constructor() {
+    this.userManager = new UserManager();
+  }
+
   async getUsers() {
     try {
-      return await usersModel.find({});
+      return await this.userManager.getUsers();
     } catch (error) {
       console.error('Error while fetching users:', error);
       return [];
@@ -13,11 +17,7 @@ class UserManager {
 
   async getUserById(id) {
     try {
-      const user = await usersModel.findById(id).lean();
-      if (!user) {
-        return 'User not found';
-      }
-      return user;
+      return await this.userManager.getUserById(id);
     } catch (error) {
       console.error('Error while fetching the user:', error);
       return 'Error while fetching the user';
@@ -26,8 +26,7 @@ class UserManager {
 
   async register(user) {
     try {
-      const newUser = new usersModel(user);
-      await newUser.save();
+      const newUser = await this.userManager.addUser(user);
       return newUser;
     } catch (error) {
       console.error('Error while registering:', error);
@@ -35,26 +34,9 @@ class UserManager {
     }
   }
 
-  async addUser(userData) {
-    try {
-      const user = new usersModel(userData);
-      const savedUser = await user.save();
-      return savedUser;
-    } catch (error) {
-      console.error('Error while adding the user:', error);
-      throw new Error('Error while adding the user');
-    }
-  }
-
   async findUser(email) {
     try {
-      const user = await usersModel.findOne({ email }, { email: 1, first_name: 1, last_name: 1, password: 1, rol: 1 });
-
-      if (!user) {
-        return null; 
-      }
-
-      return user;
+      return await this.userManager.findUser(email);
     } catch (error) {
       console.error('Error while validating the user', error);
       throw new Error('Error while validating the user');
@@ -63,8 +45,7 @@ class UserManager {
 
   async findEmail(email) {
     try {
-      const user = await usersModel.findOne({ email });
-      return user;
+      return await this.userManager.findEmail(email);
     } catch (error) {
       console.error('Error while validating the user', error);
       throw new Error('Error while validating the user');
@@ -92,4 +73,4 @@ class UserManager {
   }
 }
 
-export default UserManager;
+export default UserController;

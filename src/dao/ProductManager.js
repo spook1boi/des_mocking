@@ -1,9 +1,7 @@
-import { productsModel } from '../db/models/products.model.js';
-import CartManager from '../dao/CartManager.js';
+import { productsModel } from './models/products.model.js';
+import CartManager from './CartManager.js';
 
 class ProductManager {
-  constructor() {}
-
   async addProduct(productData) {
     try {
       await productsModel.create(productData);
@@ -75,74 +73,29 @@ class ProductManager {
 
   async getProductsByLimit(limit) {
     try {
-      const products = await productsModel.find({}).limit(limit); 
+      const products = await productsModel.find({}).limit(limit);
       return products;
     } catch (error) {
       throw error;
     }
-}
-
-async getProductsByPage(page, productsPerPage) {
-  if (page <= 0) {
-    page = 1;
   }
-  try {
-    const startIndex = (page - 1) * productsPerPage;
-    const products = await productsModel
-      .find()
-      .skip(startIndex)
-      .limit(productsPerPage);
-    return products;
-  } catch (error) {
-    console.error('Error getting products by page:', error);
-    return { error: 'Error getting products by page' };
-  }
-}
 
-  async getProductsMaster(page = 1, limit = 10, availability, category) {
+  async getProductsByPage(page, productsPerPage) {
+    if (page <= 0) {
+      page = 1;
+    }
     try {
-      let filter = {};
-      const startIndex = (page - 1) * limit;
-      const endIndex = page * limit;
-
-      if (category != "") {
-        filter.category = category;
-      }
-      if (availability != "") {
-        filter.availability = availability;
-      }
-
-      const query = productsModel
-      .find(filter)
-      .skip(startIndex)
-      .limit(limit);
-
-    const products = await query.exec();
-
-    const totalProducts = await productsModel.countDocuments(filter);
-    const totalPages = Math.ceil(totalProducts / limit);
-    const hasPrevPage = startIndex > 0;
-    const hasNextPage = endIndex < totalProducts;
-    const prevLink = hasPrevPage ? `/api/products?page=${page - 1}&limit=${limit}` : null;
-    const nextLink = hasNextPage ? `/api/products?page=${page + 1}&limit=${limit}` : null;
-
-    return {
-      status: 'success',
-      payload: products,
-      totalPages: totalPages,
-      prevPage: hasPrevPage ? page - 1 : null,
-      nextPage: hasNextPage ? page + 1 : null,
-      page: page,
-      hasPrevPage: hasPrevPage,
-      hasNextPage: hasNextPage,
-      prevLink: prevLink,
-      nextLink: nextLink,
-    };
-  } catch (error) {
-    console.error('Error getting products:', error);
-    return { status: 'error', payload: 'Error getting products' };
+      const startIndex = (page - 1) * productsPerPage;
+      const products = await productsModel
+        .find()
+        .skip(startIndex)
+        .limit(productsPerPage);
+      return products;
+    } catch (error) {
+      console.error('Error getting products by page:', error);
+      return { error: 'Error getting products by page' };
+    }
   }
-}
 
   async deleteProduct(id) {
     try {

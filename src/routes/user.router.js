@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import passport from 'passport';
-import UserManager from '../dao/UserManager.js';
+import UserController from '../controllers/UserController.js';
 import { generateToken } from '../utils.js'; 
 
 const userRouter = Router();
-const userManager = new UserManager();
+const userController = new UserController();
 
 userRouter.post("/register", passport.authenticate("register", { failureRedirect: "/api/sessions/failregister" }), async (req, res) => {
   try {
@@ -24,7 +24,7 @@ userRouter.post("/register", passport.authenticate("register", { failureRedirect
       rol: rol || defaultRole, 
     };
 
-    const result = await userManager.register(userToRegister);
+    const result = await userController.register(userToRegister);
 
     res.redirect("/api/sessions/login");
   } catch (error) {

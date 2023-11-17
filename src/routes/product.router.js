@@ -1,8 +1,8 @@
 import { Router } from "express";
-import ProductManager from "../dao/ProductManager.js";
+import productController from "../dao/ProductManager.js";
 
 const prodRouter = Router();
-const product = new ProductManager();
+const product = new productController();
 
 prodRouter.get("/products/:pid", async (req, res) => {
     try {

@@ -4,7 +4,6 @@ import passport from "passport";
 
 import { engine } from "express-handlebars";
 import * as path from "path";
-
 import MongoStore from "connect-mongo";
 import session from "express-session";
 import FileStore from "session-file-store";
@@ -12,19 +11,22 @@ import FileStore from "session-file-store";
 import "../src/db/db.config.js";
 import __dirname from "./utils.js";
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 import prodRouter from "../src/routes/product.router.js";
 import cartRouter from "../src/routes/cart.router.js";
 import userRouter from "../src/routes/user.router.js";
 
 import initializePassport from '../src/config/passport.config.js'
-import ProductManager from "../src/dao/ProductManager.js";
-import CartManager from "../src/dao/CartManager.js";
+import ProductManager from "./dao/ProductManager.js";
+import CartManager from "./dao/CartManager.js";
 
 initializePassport(passport);
 
 const app = express();
 
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 const product = new ProductManager();
 const cart = new CartManager();
 const fileStorage = FileStore(session);
@@ -33,16 +35,17 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 app.use(
-    session({
-      store: MongoStore.create({
-        mongoUrl: "mongodb+srv://SpookyBoi:Aqr6Tt0QgOgQ0qTl@cluster0.lozpuyb.mongodb.net/ecommerce",
-        mongoOptions: { useNewUrlParser: true, useUnifiedTopology: true }, ttl: 3600
-      }),
-      secret: "SecretPassword",
-      resave: false,
-      saveUninitialized: false,
-    })
-  );
+  session({
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI, 
+      mongoOptions: { useNewUrlParser: true, useUnifiedTopology: true },
+      ttl: 3600,
+    }),
+    secret: process.env.SESSION_SECRET || "SecretPassword", 
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -111,7 +114,18 @@ app.get("/carts/:cid", async (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`)
-});
+mongoose
+  .connect(process.env.MONGO_URI, { 
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Connected to Mongo");
+  })
+  .catch((error) => {
+    console.error("Error connecting to Mongo, error" + error);
+  });
 
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});

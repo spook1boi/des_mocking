@@ -4,7 +4,11 @@ import UserManager from '../dao/UserManager.js';
 import { createHash, isValidPassword, generateToken, verifyToken } from '../utils.js';
 import GitHubStrategy from 'passport-github2';
 import jwt from 'passport-jwt';
-import { usersModel } from '../db/models/users.model.js';
+import { usersModel } from '../dao/models/users.model.js';
+import config from '../config/config.js'; 
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const LocalStrategy = local.Strategy;
 const userManager = new UserManager();
@@ -25,17 +29,17 @@ const initializePassword = () => {
     { passReqToCallback: true, usernameField: "email" },
     async (req, username, password, done) => {
       const { first_name, last_name, email, age } = req.body;
-  
+
       try {
         const user = await userManager.findEmail(email);
-  
+
         if (user) {
           console.log("User already exists");
           return done(null, false);
         }
-  
+
         const hashedPassword = await createHash(password);
-  
+
         const newUser = {
           first_name,
           last_name,
@@ -43,7 +47,7 @@ const initializePassword = () => {
           age,
           password: hashedPassword
         };
-  
+
         newUser.rol = "user";
 
         const result = await userManager.addUser(newUser);
@@ -89,13 +93,13 @@ const initializePassword = () => {
   passport.use('login', new LocalStrategy({ usernameField: "email" }, authenticateUser));
 
   passport.use('github', new GitHubStrategy({
-    clientID: 'Iv1.16ad7325476479bb',
-    clientSecret: '2e127e55ef4ff5cb001b4fcbd07d991b5eb64dbf',
-    callbackURL: 'http://localhost:8080/api/sessions/githubcallback',
+    clientID: config.githubClientID,
+    clientSecret: config.githubClientSecret,
+    callbackURL: process.env.GITHUB_CALLBACK_URL, 
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       const user = await userManager.findEmail(profile._json.email);
-
+  
       if (!user) {
         const newUser = {
           first_name: profile._json.login,
@@ -104,7 +108,7 @@ const initializePassword = () => {
           password: "",
           rol: "user"
         };
-
+  
         const result = await userManager.addUser(newUser);
         done(null, result);
       } else {
@@ -117,7 +121,7 @@ const initializePassword = () => {
 
   passport.use('jwt', new JwtStrategy({
     jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
-    secretOrKey: 'Secret-key'
+    secretOrKey: config.jwtSecret
   }, async (jwt_payload, done) => {
     try {
       const user = await verifyToken(jwt_payload);
@@ -132,10 +136,10 @@ const initializePassword = () => {
 
   passport.use('current', new JwtStrategy({
     jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
-    secretOrKey: 'Secret-key'
+    secretOrKey: config.jwtSecret
   }, async (jwt_payload, done) => {
     try {
-      const user = generateToken(jwt_payload); 
+      const user = generateToken(jwt_payload);
       return done(null, user);
     } catch (err) {
       return done(err);

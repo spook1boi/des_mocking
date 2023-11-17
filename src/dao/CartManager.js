@@ -1,31 +1,29 @@
-import { cartsModel } from '../db/models/carts.model.js';
+import { cartsModel } from './models/carts.model.js';
 import mongoose from "mongoose";
 
 class CartManager {
   constructor() {
     this.cartsModel = cartsModel;
   }
+
   async getCarts() {
     try {
       const carts = await this.cartsModel.find({}).populate({
-        path: "products.productId",
-        model: "products",
-        select: "image description price stock",
+        path: 'products.productId',
+        model: 'products',
+        select: 'image description price stock',
       });
       return carts;
     } catch (error) {
-      console.error('Error getting carts:', error);
-      return [];
+      throw error;
     }
   }
 
   async addCart(cartData) {
     try {
       await this.cartsModel.create(cartData);
-      return 'Cart added';
     } catch (error) {
-      console.error('Error adding cart:', error);
-      return 'Error adding cart';
+      throw error;
     }
   }
 
@@ -38,8 +36,7 @@ class CartManager {
       }
       return cart;
     } catch (error) {
-      console.error('Error getting cart:', error);
-      return 'Error getting cart';
+      throw error;
     }
   }
 
@@ -51,7 +48,9 @@ class CartManager {
         return 'Cart not found';
       }
 
-      const existingProduct = cart.products.find((product) => product.productId === prodId);
+      const existingProduct = cart.products.find(
+        (product) => product.productId === prodId
+      );
 
       if (existingProduct) {
         existingProduct.quantity += 1;
@@ -65,8 +64,7 @@ class CartManager {
       await cart.save();
       return 'Product added to cart';
     } catch (error) {
-      console.error('Error adding product to cart:', error);
-      return 'Error adding product to cart';
+      throw error;
     }
   }
 
@@ -77,7 +75,9 @@ class CartManager {
         return 'Cart not found';
       }
 
-      const productIndex = cart.products.findIndex((product) => product.productId === prodId);
+      const productIndex = cart.products.findIndex(
+        (product) => product.productId === prodId
+      );
 
       if (productIndex !== -1) {
         cart.products.splice(productIndex, 1);
@@ -87,8 +87,7 @@ class CartManager {
         return 'Product not found in cart';
       }
     } catch (error) {
-      console.error('Error removing product from cart:', error);
-      return 'Error removing product from cart';
+      throw error;
     }
   }
 
@@ -105,8 +104,7 @@ class CartManager {
       await cart.save();
       return 'Cart updated with new products';
     } catch (error) {
-      console.error('Error updating cart:', error);
-      return 'Error updating cart';
+      throw error;
     }
   }
 
@@ -117,7 +115,9 @@ class CartManager {
         return 'Cart not found';
       }
 
-      const productToUpdate = cart.products.find((product) => product.productId === prodId);
+      const productToUpdate = cart.products.find(
+        (product) => product.productId === prodId
+      );
 
       if (!productToUpdate) {
         return 'Product not found in cart';
@@ -128,8 +128,7 @@ class CartManager {
       await cart.save();
       return 'Updated product in cart';
     } catch (error) {
-      console.error('Error updating product in cart:', error);
-      return 'Error updating product in cart';
+      throw error;
     }
   }
 
@@ -145,21 +144,22 @@ class CartManager {
 
       return 'Todos los productos han sido eliminados del carrito';
     } catch (error) {
-      console.error('Error al eliminar los productos del carrito:', error);
-      return 'Error al eliminar los productos del carrito';
+      throw error;
     }
   }
 
   async getCartWithProducts(cartId) {
     try {
-      const cart = await this.cartsModel.findById(cartId).populate('products.productId').lean();
+      const cart = await this.cartsModel
+        .findById(cartId)
+        .populate('products.productId')
+        .lean();
       if (!cart) {
         return 'Cart not found';
       }
       return cart;
     } catch (error) {
-      console.error('Error getting cart:', error);
-      return 'Error getting cart';
+      throw error;
     }
   }
 }

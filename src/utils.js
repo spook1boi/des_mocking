@@ -1,10 +1,13 @@
-import path from "path"
-import { fileURLToPath } from "url"
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import path from "path";
+import { fileURLToPath } from "url";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const createHash = async (password) => {
   try {
@@ -32,7 +35,9 @@ export const isValidPassword = (user, password) => {
 
 export const generateToken = (payload) => {
   try {
-    const token = jwt.sign(payload, 'secret_key', { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret_key', {
+      expiresIn: '1h',
+    });
     return token;
   } catch (error) {
     console.error("Error al generar el token: ", error);
@@ -42,7 +47,7 @@ export const generateToken = (payload) => {
 
 export const verifyToken = (token) => {
   try {
-    const decoded = jwt.verify(token, 'secret_key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
     return decoded;
   } catch (error) {
     console.error("Error al verificar el token: ", error);
@@ -50,4 +55,4 @@ export const verifyToken = (token) => {
   }
 };
 
-export default __dirname
+export default __dirname;
