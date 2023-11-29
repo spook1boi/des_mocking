@@ -1,14 +1,14 @@
 import jwt from 'jsonwebtoken';
-import UserManager from '../dao/UserManager.js';
+import UsersRepository from '../repositories/User.repository.js';
 
 class UserController {
   constructor() {
-    this.userManager = new UserManager();
+    this.usersRepository = new UsersRepository();
   }
 
   async getUsers() {
     try {
-      return await this.userManager.getUsers();
+      return await this.usersRepository.getUsers();
     } catch (error) {
       console.error('Error while fetching users:', error);
       return [];
@@ -17,16 +17,17 @@ class UserController {
 
   async getUserById(id) {
     try {
-      return await this.userManager.getUserById(id);
+      return await this.usersRepository.getUserById(id);
     } catch (error) {
       console.error('Error while fetching the user:', error);
       return 'Error while fetching the user';
     }
   }
 
-  async register(user) {
+  async register(userData) {
     try {
-      const newUser = await this.userManager.addUser(user);
+      const userDTO = new UserDTO(userData);
+      const newUser = await this.usersRepository.addUser(userDTO);
       return newUser;
     } catch (error) {
       console.error('Error while registering:', error);
@@ -36,7 +37,7 @@ class UserController {
 
   async findUser(email) {
     try {
-      return await this.userManager.findUser(email);
+      return await this.usersRepository.findUser(email);
     } catch (error) {
       console.error('Error while validating the user', error);
       throw new Error('Error while validating the user');
@@ -45,7 +46,7 @@ class UserController {
 
   async findEmail(email) {
     try {
-      return await this.userManager.findEmail(email);
+      return await this.usersRepository.findEmail(email);
     } catch (error) {
       console.error('Error while validating the user', error);
       throw new Error('Error while validating the user');

@@ -1,14 +1,14 @@
-import ProductManager from '../dao/ProductManager.js';
+import ProductsRepository from '../repositories/Products.repository.js';
 
 class ProductController {
   constructor() {
-    this.ProductManager = new ProductManager();
+    this.productsRepository = new ProductsRepository();
   }
 
   async addProduct(req, res) {
     try {
-      const productData = req.body;
-      const result = await this.ProductManager.addProduct(productData);
+      const productDTO = req.body;
+      const result = await this.productsRepository.addProduct(productDTO);
       res.status(200).json({ status: 'success', message: result });
     } catch (error) {
       res.status(500).json({ status: 'error', message: error.message });
@@ -18,8 +18,8 @@ class ProductController {
   async updateProduct(req, res) {
     try {
       const productId = req.params.id;
-      const productData = req.body;
-      const result = await this.ProductManager.updateProduct(productId, productData);
+      const productDTO = req.body;
+      const result = await this.productsRepository.updateProduct(productId, productDTO);
       res.status(200).json({ status: 'success', message: result });
     } catch (error) {
       res.status(500).json({ status: 'error', message: error.message });
@@ -28,7 +28,7 @@ class ProductController {
 
   async getProducts(req, res) {
     try {
-      const products = await this.ProductManager.getProducts();
+      const products = await this.productsRepository.getProducts();
       res.status(200).json({ status: 'success', products: products });
     } catch (error) {
       res.status(500).json({ status: 'error', message: error.message });
@@ -38,7 +38,7 @@ class ProductController {
   async getProductById(req, res) {
     try {
       const productId = req.params.id;
-      const product = await this.ProductManager.getProductById(productId);
+      const product = await this.productsRepository.getProductById(productId);
       res.status(200).json({ status: 'success', product: product });
     } catch (error) {
       res.status(500).json({ status: 'error', message: error.message });
@@ -48,38 +48,7 @@ class ProductController {
   async getProductsByCategory(req, res) {
     try {
       const category = req.params.category;
-      const products = await this.ProductManager.getProductsByCategory(category);
-      res.status(200).json({ status: 'success', products: products });
-    } catch (error) {
-      res.status(500).json({ status: 'error', message: error.message });
-    }
-  }
-
-  async getProductsByQuery(req, res) {
-    try {
-      const query = req.query.q;
-      const products = await this.ProductManager.getProductsByQuery(query);
-      res.status(200).json({ status: 'success', products: products });
-    } catch (error) {
-      res.status(500).json({ status: 'error', message: error.message });
-    }
-  }
-
-  async getProductsByLimit(req, res) {
-    try {
-      const limit = parseInt(req.query.limit);
-      const products = await this.ProductManager.getProductsByLimit(limit);
-      res.status(200).json({ status: 'success', products: products });
-    } catch (error) {
-      res.status(500).json({ status: 'error', message: error.message });
-    }
-  }
-
-  async getProductsByPage(req, res) {
-    try {
-      const page = parseInt(req.query.page) || 1;
-      const productsPerPage = parseInt(req.query.limit) || 10;
-      const products = await this.ProductManager.getProductsByPage(page, productsPerPage);
+      const products = await this.productsRepository.getProductsByCategory(category);
       res.status(200).json({ status: 'success', products: products });
     } catch (error) {
       res.status(500).json({ status: 'error', message: error.message });
@@ -89,7 +58,7 @@ class ProductController {
   async deleteProduct(req, res) {
     try {
       const productId = req.params.id;
-      const result = await this.ProductManager.deleteProduct(productId);
+      const result = await this.productsRepository.deleteProduct(productId);
       res.status(200).json({ status: 'success', message: result });
     } catch (error) {
       res.status(500).json({ status: 'error', message: error.message });

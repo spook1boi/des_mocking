@@ -32,15 +32,15 @@ userRouter.post("/register", passport.authenticate("register", { failureRedirect
   }
 });
 
-userRouter.post("/login", (req, res, next) => {
-  passport.authenticate("login", async (err, user) => {
-    if (err) {
-      return res.status(500).send("Error al iniciar sesión: " + err.message);
+userRouter.post("/login", async (req, res, next) => {
+  try {
+    const result = await userController.login(req, res, next);
+
+    if (result.error) {
+      return res.status(result.status).send(result.error);
     }
-    
-    if (!user) {
-      return res.status(400).send({ status: "error", error: "Credenciales inválidas" });
-    }
+
+    const { user, token, redirectPath } = result;
 
     req.logIn(user, async (loginErr) => {
       if (loginErr) {
@@ -51,7 +51,7 @@ userRouter.post("/login", (req, res, next) => {
         email: user.email,
         rol: user.rol,
       };
- 
+
       const token = await generateToken(userPayload);
       console.log('Token:', token);
       res.cookie('token', token, { httpOnly: true, maxAge: 3600000 }); 
@@ -67,10 +67,13 @@ userRouter.post("/login", (req, res, next) => {
         req.session.lastName = user.last_name;      
         req.session.emailUser = user.email;
         req.session.rol = user.rol;
-        res.redirect("/");
+        res.redirect(redirectPath);
       }
     });
-  })(req, res, next);
+  } catch (error) {
+    console.error('Error while logging in:', error);
+    res.status(500).send("Error while logging in: " + error.message);
+  }
 });
 
 userRouter.get("/faillogin", (req, res) => {
@@ -78,13 +81,19 @@ userRouter.get("/faillogin", (req, res) => {
 });
 
 userRouter.get("/logout", (req, res) => {
-  req.session.destroy((error) => {
-    if (error) {
-      return res.json({ status: 'Logout Error', body: error });
+  try {
+    const result = userController.logout(req, res);
+
+    if (result.error) {
+      return res.status(result.status).json({ status: 'Logout Error', body: result.error });
     }
+
     res.clearCookie('token'); 
     res.redirect('/api/sessions/login');
-  });
+  } catch (error) {
+    console.error('Error while logging out:', error);
+    res.status(500).json({ status: 'Logout Error', body: error.message });
+  }
 });
 
 userRouter.get("/github", passport.authenticate("github", { scope: ["user:email"] }), (req, res) => {});
@@ -98,22 +107,16 @@ userRouter.get("/githubcallback", passport.authenticate("github", { failureRedir
 
 userRouter.get('/current', async (req, res) => {
   try {
-    if (req.isAuthenticated()) {
-      const user = {
-        first_name: req.user.first_name,
-        last_name: req.user.last_name,
-        email: req.user.email,
-        age: req.user.age,
-        rol: req.user.rol,
-      };
+    const result = await userController.getCurrentUserInfo(req);
 
-      return res.status(200).json(user);
-    } else {
-      return res.status(401).json({ message: 'Usuario no autenticado' });
+    if (result.error) {
+      return res.status(result.status).json({ message: result.error });
     }
+
+    return res.status(200).json(result.user);
   } catch (error) {
-    console.error('Error al obtener el usuario actual:', error);
-    return res.status(500).json({ message: 'Error al obtener el usuario actual' });
+    console.error('Error while getting current user:', error);
+    return res.status(500).json({ message: 'Error while getting current user' });
   }
 });
 

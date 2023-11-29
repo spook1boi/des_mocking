@@ -1,10 +1,12 @@
 import { productsModel } from './models/products.model.js';
-import CartManager from './CartManager.js';
+import mongoose from "mongoose";
+import ProductDTO from '../DTOs/product.dto.js';
 
-class ProductManager {
-  async addProduct(productData) {
+class ProductsMongoDAO {
+  async addProduct(productDTO) {
     try {
-      await productsModel.create(productData);
+      const product = new productsModel(productDTO);
+      await product.save();
       return 'Product added';
     } catch (error) {
       console.error('Error adding product:', error);
@@ -12,13 +14,13 @@ class ProductManager {
     }
   }
 
-  async updateProduct(id, productData) {
+  async updateProduct(id, productDTO) {
     try {
       const product = await productsModel.findById(id);
       if (!product) {
         return 'Product not found';
       }
-      product.set(productData);
+      product.set(productDTO);
       await product.save();
       return 'Product updated';
     } catch (error) {
@@ -30,7 +32,7 @@ class ProductManager {
   async getProducts() {
     try {
       const products = await productsModel.find({});
-      return products;
+      return products.map(product => new ProductDTO(product));
     } catch (error) {
       console.error('Error getting products:', error);
       return [];
@@ -43,7 +45,7 @@ class ProductManager {
       if (!product) {
         return 'Product not found';
       }
-      return product;
+      return new ProductDTO(product);
     } catch (error) {
       console.error('Error getting product:', error);
       return 'Error getting product';
@@ -53,47 +55,10 @@ class ProductManager {
   async getProductsByCategory(category) {
     try {
       const products = await productsModel.find({ category });
-      return products;
+      return products.map(product => new ProductDTO(product));
     } catch (error) {
       console.error('Error al obtener productos por categoría:', error);
       throw error;
-    }
-  }
-
-  async getProductsByQuery(query) {
-    try {
-      const products = await productsModel.find({
-        description: { $regex: query, $options: 'i' },
-      });
-      return products;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getProductsByLimit(limit) {
-    try {
-      const products = await productsModel.find({}).limit(limit);
-      return products;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async getProductsByPage(page, productsPerPage) {
-    if (page <= 0) {
-      page = 1;
-    }
-    try {
-      const startIndex = (page - 1) * productsPerPage;
-      const products = await productsModel
-        .find()
-        .skip(startIndex)
-        .limit(productsPerPage);
-      return products;
-    } catch (error) {
-      console.error('Error getting products by page:', error);
-      return { error: 'Error getting products by page' };
     }
   }
 
@@ -112,4 +77,4 @@ class ProductManager {
   }
 }
 
-export default ProductManager;
+export default ProductsMongoDAO;
