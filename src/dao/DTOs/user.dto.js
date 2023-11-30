@@ -8,5 +8,3 @@ export default class UserDTO {
         this.password = user.password
     }
 }
-
-module.exports = UserDTO;

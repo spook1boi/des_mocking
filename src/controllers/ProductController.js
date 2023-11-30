@@ -28,12 +28,12 @@ class ProductController {
 
   async getProducts(req, res) {
     try {
-      const products = await this.productsRepository.getProducts();
-      res.status(200).json({ status: 'success', products: products });
+        const products = await this.productsRepository.getProducts();
+        res.status(200).json({ status: 'success', products: products });
     } catch (error) {
-      res.status(500).json({ status: 'error', message: error.message });
+        res.status(500).json({ status: 'error', message: error.message });
     }
-  }
+}
 
   async getProductById(req, res) {
     try {

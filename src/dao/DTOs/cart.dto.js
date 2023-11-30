@@ -5,5 +5,3 @@ export default class CartDTO {
         this.total = cart.total || 0;
     }
 };
-  
-module.exports = CartDTO;

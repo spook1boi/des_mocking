@@ -7,5 +7,3 @@ export default class TicketDTO {
         this.purchaser = ticket.purchaser
     }
 }
-
-module.exports = TicketDTO;

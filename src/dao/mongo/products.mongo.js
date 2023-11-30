@@ -37,7 +37,7 @@ class ProductsMongoDAO {
       console.error('Error getting products:', error);
       return [];
     }
-  }
+}
 
   async getProductById(id) {
     try {
