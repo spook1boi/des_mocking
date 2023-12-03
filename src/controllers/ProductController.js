@@ -26,22 +26,22 @@ class ProductController {
     }
   }
 
-  async getProducts(req, res) {
+  async getProducts() {
     try {
-        const products = await this.productsRepository.getProducts();
-        res.status(200).json({ status: 'success', products: products });
+      const products = await this.productsRepository.getProducts();
+      return products.map(product => product.toJSON());
     } catch (error) {
-        res.status(500).json({ status: 'error', message: error.message });
+      throw error;
     }
-}
+  }
 
-  async getProductById(req, res) {
+  async getProductById(id) {
     try {
-      const productId = req.params.id;
-      const product = await this.productsRepository.getProductById(productId);
-      res.status(200).json({ status: 'success', product: product });
+      const product = await this.productsRepository.getProductById(id);
+      return product;
     } catch (error) {
-      res.status(500).json({ status: 'error', message: error.message });
+      console.error('Error getting product by ID:', error);
+      throw error;
     }
   }
 
@@ -52,6 +52,16 @@ class ProductController {
       res.status(200).json({ status: 'success', products: products });
     } catch (error) {
       res.status(500).json({ status: 'error', message: error.message });
+    }
+  }
+
+  async getProductsMaster(page, limit, category, availability, sortOrder) {
+    try {
+      const products = await this.productsRepository.getProductsMaster(page, limit, category, availability, sortOrder);
+      return { status: 'success', products: products };
+    } catch (error) {
+      console.error('Error getting products:', error);
+      return { status: 'error', message: 'Error getting products' };
     }
   }
 

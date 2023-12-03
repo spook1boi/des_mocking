@@ -4,14 +4,20 @@ import ProductController from "../controllers/ProductController.js";
 const prodRouter = Router();
 const productController = new ProductController();
 
+const errorHandler = (res, error) => {
+  console.error('Error:', error);
+  res.status(500).json({ error: 'Internal Server Error' });
+};
+
 prodRouter.get("/products/:pid", async (req, res) => {
   try {
     const prodId = req.params.pid;
     const productDetails = await productController.getProductById(prodId);
+    
     if (productDetails === 'Product not found') {
       res.status(404).json({ error: 'Product not found' });
     } else {
-      res.render('viewProducts', { layout: 'main', product: productDetails });
+      res.render('productDetails', { layout: 'main', title: 'Detalles del Producto', product: productDetails });
     }
   } catch (error) {
     console.error('Error getting the product:', error);
@@ -20,80 +26,87 @@ prodRouter.get("/products/:pid", async (req, res) => {
 });
 
 prodRouter.get("/products/category/:category", async (req, res) => {
-  const category = req.params.category;
-
   try {
+    const category = req.params.category;
     const products = await productController.getProductsByCategory(category);
-
     if (products.length === 0) {
-      res.status(404).json({ error: 'No se encontraron productos en la categoria proporcionada.' });
+      res.status(404).json({ error: 'No se encontraron productos en la categoría proporcionada.' });
     } else {
       res.json(products);
     }
   } catch (error) {
-    console.error('Error al obtener productos por categoria:', error);
-    res.status(500).json({ error: 'Error al obtener productos por categoria' });
+    errorHandler(res, error);
   }
 });
 
 prodRouter.get("/products/limit/:limit", async (req, res) => {
-  let limit = parseInt(req.params.limit);
-  if (isNaN(limit) || limit <= 0) {
-    limit = 10;
+  try {
+    let limit = parseInt(req.params.limit) ?? 10;
+    res.json(await productController.getProductsByLimit(limit));
+  } catch (error) {
+    errorHandler(res, error);
   }
-  res.send(await productController.getProductsByLimit(limit));
 });
 
 prodRouter.get("/products/page/:page", async (req, res) => {
-  const page = parseInt(req.params.page);
-  if (isNaN(page) || page <= 0) {
-    return res.status(400).json({ error: 'Invalid page number' });
-  }
-  const productsPerPage = 10;
   try {
+    const page = parseInt(req.params.page) ?? 1;
+    if (page <= 0) {
+      return res.status(400).json({ error: 'Invalid page number' });
+    }
+    const productsPerPage = 10;
     const products = await productController.getProductsByPage(page, productsPerPage);
     res.json(products);
   } catch (error) {
-    console.error('Error getting products by page:', error);
-    res.status(500).json({ error: 'Error getting products by page' });
+    errorHandler(res, error);
   }
 });
 
 prodRouter.put("/products/:pid", async (req, res) => {
-  const pid = req.params.pid;
-  const updProd = req.body;
-  res.send(await productController.updateProduct(pid, updProd));
+  try {
+    const pid = req.params.pid;
+    const updProd = req.body;
+    res.json(await productController.updateProduct(pid, updProd));
+  } catch (error) {
+    errorHandler(res, error);
+  }
 });
 
 prodRouter.get("/products/search/query", async (req, res) => {
-  const query = req.query.q;
-  res.send(await productController.getProductsByQuery(query));
+  try {
+    const query = req.query.q;
+    res.json(await productController.getProductsByQuery(query));
+  } catch (error) {
+    errorHandler(res, error);
+  }
 });
 
 prodRouter.post("/products", async (req, res) => {
-  const newProduct = req.body;
-  res.send(await productController.addProduct(newProduct));
+  try {
+    const newProduct = req.body;
+    res.json(await productController.addProduct(newProduct));
+  } catch (error) {
+    errorHandler(res, error);
+  }
 });
 
 prodRouter.delete("/products/:pid", async (req, res) => {
-  const pid = req.params.pid;
-  res.send(await productController.delProducts(pid));
+  try {
+    const pid = req.params.pid;
+    res.json(await productController.delProducts(pid));
+  } catch (error) {
+    errorHandler(res, error);
+  }
 });
 
 prodRouter.get("/products", async (req, res) => {
-  let sortOrder = req.query.sortOrder;
-  let category = req.query.category;
-  let availability = req.query.availability;
-  if (sortOrder === undefined) {
-    sortOrder = "asc";
+  try {
+    const { sortOrder = "asc", category = "", availability = "" } = req.query;
+    const products = await productController.getProductsMaster(null, null, category, availability, sortOrder);
+    res.json(products);
+  } catch (error) {
+    errorHandler(res, error);
   }
-  if (category === undefined) {
-    category = "";
-  }
-  if (availability === undefined) {
-    availability = "";
-  }
-  res.send(await productController.getProductsMaster(null, null, category, availability, sortOrder));
 });
 
 export default prodRouter;

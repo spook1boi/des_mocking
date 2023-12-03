@@ -61,28 +61,27 @@ app.use("/api/sessions", userRouter);
 
 app.get("/", async (req, res) => {
     try {
-        const allProducts = await productController.getProducts();
-        const productData = allProducts.map(product => product.toJSON());
-        const page = parseInt(req.query.page) || 1;
-
-        const user = {
-            first_name: req.session.firstName,
-            last_name: req.session.lastName,
-            rol: req.session.rol,
-        };
-
-        console.log("User object:", user);
-        res.render("home", {
-            title: "Vista Products",
-            products: productData,
-            page: page,
-            user: user,
-        });
+      const productData = await productController.getProducts();
+      const page = parseInt(req.query.page) || 1;
+  
+      const user = {
+        first_name: req.session.firstName,
+        last_name: req.session.lastName,
+        rol: req.session.rol,
+      };
+  
+      console.log("User object:", user);
+      res.render("home", {
+        title: "Vista Products",
+        products: productData,
+        page: page,
+        user: user,
+      });
     } catch (error) {
-        console.error('Error al obtener productos:', error);
-        res.status(500).send('Error al obtener productos');
+      console.error('Error al obtener productos:', error);
+      res.status(500).send('Error al obtener productos');
     }
-});
+  });
 
 app.get('/api/sessions/register', async (req, res) => {
     res.render('register', { title: 'Register' });

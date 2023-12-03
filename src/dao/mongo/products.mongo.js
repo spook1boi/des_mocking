@@ -62,6 +62,40 @@ class ProductsMongoDAO {
     }
   }
 
+  async getProductsMaster(page, limit, category, availability, sortOrder) {
+    try {
+      const filter = {};
+
+      if (category) {
+        filter.category = category;
+      }
+
+      if (availability) {
+        filter.stock = { $gt: 0 }; 
+      }
+
+      const sort = {};
+
+      if (sortOrder === "desc") {
+        sort.price = -1; 
+      } else {
+        sort.price = 1;
+      }
+
+      const options = {
+        skip: (page - 1) * limit,
+        limit: limit,
+      };
+
+      const products = await productsModel.find(filter).sort(sort).skip(options.skip).limit(options.limit);
+
+      return products;
+    } catch (error) {
+      console.error('Error getting products:', error);
+      throw error;
+    }
+  }
+
   async deleteProduct(id) {
     try {
       const product = await productsModel.findById(id);
