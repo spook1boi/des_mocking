@@ -5,7 +5,6 @@ export default class ProductDTO {
       this.price = product.price;
       this.stock = product.stock;
       this.category = product.category;
-      this.availability = product.availability;
     }
   
     toJSON() {
@@ -15,7 +14,6 @@ export default class ProductDTO {
         price: this.price,
         stock: this.stock,
         category: this.category,
-        availability: this.availability,
       };
     }
   }

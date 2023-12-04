@@ -13,7 +13,7 @@ prodRouter.get("/products/:pid", async (req, res) => {
   try {
     const prodId = req.params.pid;
     const productDetails = await productController.getProductById(prodId);
-    
+
     if (productDetails === 'Product not found') {
       res.status(404).json({ error: 'Product not found' });
     } else {

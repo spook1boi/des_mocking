@@ -1,5 +1,5 @@
 import { cartsModel } from './models/carts.model.js';
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 import CartDTO from '../DTOs/cart.dto.js';
 
 class CartsMongoDAO {
@@ -38,16 +38,43 @@ class CartsMongoDAO {
     }
   }
 
-  // Resto de funciones...
-
   async removeProductFromCart(cartId, prodId) {
-    // Implementación similar a la función existente, adaptada para trabajar con DTO
+    try {
+      const cart = await cartsModel.findById(cartId);
+      if (!cart) {
+        return 'Cart not found';
+      }
+
+      const productIndex = cart.products.findIndex(product => product.productId.equals(prodId));
+
+      if (productIndex === -1) {
+        return 'Product not found in the cart';
+      }
+
+      cart.products.splice(productIndex, 1);
+
+      await cart.save();
+    } catch (error) {
+      throw error;
+    }
   }
 
-  // Resto de funciones...
-
   async getCartWithProducts(cartId) {
-    // Implementación similar a la función existente, adaptada para trabajar con DTO
+    try {
+      const cart = await cartsModel.findById(cartId).populate({
+        path: 'products.productId',
+        model: 'products',
+        select: 'image description price stock',
+      });
+
+      if (!cart) {
+        return 'Cart not found';
+      }
+
+      return new CartDTO(cart);
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
