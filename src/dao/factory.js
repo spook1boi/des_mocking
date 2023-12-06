@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import config from '../config/config.js';
 
-let Carts;
-let Products;
-let Users;
-let Tickets;
+export let Carts;
+export let Products;
+export let Users;
+export let Tickets;
 
 switch (config.persistence) {
   case "MONGO":

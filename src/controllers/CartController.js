@@ -31,17 +31,39 @@ class CartController {
     }
   }
 
-  // Resto de funciones...
-
   async removeProductFromCart(cartId, prodId) {
-    // Implementación similar a la función existente
+    try {
+      await this.cartsRepository.removeProductFromCart(cartId, prodId);
+    } catch (error) {
+      throw error;
+    }
   }
-
-  // Resto de funciones...
 
   async getCartWithProducts(cartId) {
-    // Implementación similar a la función existente
+    try {
+      const cartWithProducts = await this.cartsRepository.getCartWithProducts(cartId);
+      return cartWithProducts;
+    } catch (error) {
+      throw error;
+    }
   }
+
+  async addProductToCart(cartId, productDTO) {
+    try {
+      await this.cartsRepository.addProductToCart(cartId, productDTO);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateProductQuantity(cartId, prodId, quantity) {
+    try {
+      await this.cartsRepository.updateProductQuantity(cartId, prodId, quantity);
+    } catch (error) {
+      throw error;
+    }
+  }
+
 }
 
 export default CartController;

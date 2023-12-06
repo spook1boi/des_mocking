@@ -1,5 +1,5 @@
 import CartsMongoDAO from '../dao/mongo/carts.mongo.js';
-import cartDTO from '../dao/DTOs/cart.dto.js';
+import CartDTO from '../dao/DTOs/cart.dto.js';
 
 class CartsRepository {
   constructor() {
@@ -18,17 +18,37 @@ class CartsRepository {
     return await this.cartsDAO.getCartById(cartId);
   }
 
-  // Resto de funciones...
-
   async removeProductFromCart(cartId, prodId) {
-    // Implementación similar a la función existente
+    return await this.cartsDAO.removeProductFromCart(cartId, prodId);
   }
-
-  // Resto de funciones...
 
   async getCartWithProducts(cartId) {
-    // Implementación similar a la función existente
+    return await this.cartsDAO.getCartWithProducts(cartId);
   }
+
+  async addProductToCart(cartId, productDTO) {
+    const cart = await this.cartsDAO.getCartById(cartId);
+
+    if (!cart) {
+      throw new Error('Cart not found');
+    }
+
+    const updatedCart = await this.cartsDAO.addProductToCart(cartId, productDTO);
+
+    return updatedCart;
+  }
+
+  async updateProductQuantity(cartId, prodId, quantity) {
+    const cart = await this.cartsDAO.getCartById(cartId);
+    if (!cart) {
+
+      throw new Error('Cart not found');
+    }
+    const updatedCart = await this.cartsDAO.updateProductQuantity(cartId, prodId, quantity);
+
+    return updatedCart;
+  }
+
 }
 
 export default CartsRepository;

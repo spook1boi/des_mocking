@@ -21,6 +21,9 @@ import initializePassport from '../src/config/passport.config.js'
 import ProductController from "../src/controllers/ProductController.js";
 import CartController from "../src/controllers/CartController.js";
 
+import { generateMockProducts } from "./mocking.js";
+import { handleProductCreationError } from "./errorHandler.js";
+
 initializePassport(passport);
 
 const app = express();
@@ -120,6 +123,16 @@ app.get("/carts/:cid", async (req, res) => {
         console.error('Error al obtener carrito con productos:', error);
         res.status(500).send('Error al obtener carrito con productos');
     }
+});
+
+app.get("/mockingproducts", async (req, res) => {
+  try {
+    const products = generateMockProducts();
+    res.send(products);
+  } catch (error) {
+    console.error(`Error al generar productos mock: ${error}`);
+    res.status(500).json({ error: 'Error al generar productos mock' });
+  }
 });
 
 mongoose
